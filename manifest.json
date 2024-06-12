@@ -1,0 +1,34 @@
+{
+    "manifest_version": 3,
+    "name": "switch-container",
+    "version": "1.0",
+
+    "description": "Does stuff",
+
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "switch-container@qianli"
+        }
+    },
+
+    "commands": {
+        "_execute_action": {
+            "suggested_key": {
+                "default": "Alt+Shift+O"
+            },
+            "description": "Open popup"
+        }
+    },
+
+    "action": {
+        "default_title": "Contextual Identities",
+        "default_popup": "popup.html"
+    },
+
+    "permissions": [
+        "contextualIdentities",
+        "cookies",
+        "tabs"
+    ]
+
+}

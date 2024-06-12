@@ -1,0 +1,48 @@
+html, body {
+    width: 500px;
+    /* height: 1000px; */
+    overflow: hidden;
+    font-family: sans-serif;
+}
+
+#panel {
+    margin: 5px 5px 0 5px;
+}
+
+#panel input {
+    width: calc(100% - 5px);
+    margin-bottom: 0.5em;
+    font-size: 1em;
+}
+
+.row {
+    padding-top: 0.5em;
+    padding-left: 5px;
+}
+
+.row.current {
+    background-color: #dddddd;
+}
+
+.icon {
+    width: 1em;
+    height: 1em;
+    mask-size: cover;
+}
+
+.name {
+    display: inline-block;
+    margin-left: 1em;
+    position: relative;
+    bottom: 0.125em;
+}
+
+@media (prefers-color-scheme: dark) {
+    body {
+        color: #eee;
+        background: #333;
+    }
+    .row.current {
+        background-color: #666;
+    }
+}
