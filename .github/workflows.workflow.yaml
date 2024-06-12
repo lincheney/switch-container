@@ -1,0 +1,26 @@
+name: Workflow
+on:
+  push:
+    branches: [main]
+    paths: [manifest.json]
+
+# permission can be added at job level or workflow level
+permissions:
+  id-token: write
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v1
+
+      - name: make a release
+        env:
+          AMO_ISSUER: ${{ secrets.amo_issuer }}
+          AMO_SECRET: ${{ secrets.amo_secret }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REPO: ${{ github.repository }}
+        run: bash .deploy switch-container-%s.xpi
