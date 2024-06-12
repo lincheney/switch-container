@@ -39,6 +39,7 @@ github_curl() {
 
 version="$(<manifest.json jq -re .version)"
 addon_id="$(<manifest.json jq -re .browser_specific_settings.gecko.id)"
+filename="$(printf "$1" "$version")"
 log "Got version $version"
 
 if details="$(addon_curl "https://addons.mozilla.org/api/v5/addons/addon/$addon_id/versions/$version/")"; then
@@ -46,10 +47,10 @@ if details="$(addon_curl "https://addons.mozilla.org/api/v5/addons/addon/$addon_
 
 else
     log 'Creating zip file'
-    zip -r -FS ffcli.zip "${files[@]}"
+    zip -r -FS "$filename" "${files[@]}"
 
     log 'Uploading zip file'
-    upload="$(addon_curl https://addons.mozilla.org/api/v5/addons/upload/ -XPOST -F upload=@ffcli.zip -F channel=unlisted | jq -re .uuid)"
+    upload="$(addon_curl https://addons.mozilla.org/api/v5/addons/upload/ -XPOST -F upload=@"$filename" -F channel=unlisted | jq -re .uuid)"
     log 'Waiting for addon to be validated'
     while true; do
         details="$(addon_curl "https://addons.mozilla.org/api/v5/addons/upload/$upload/" -H 'Content-Type: application/json')"
@@ -84,7 +85,6 @@ fi
 
 url="$(<<<"$details" jq -re .file.url)"
 log 'Downloading XPI'
-filename="$(printf "$1" "$version")"
 addon_curl "$url" --output "$filename"
 
 url="https://github.com/$GITHUB_REPO/releases/download/$version/$filename"
