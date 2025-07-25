@@ -35,18 +35,26 @@ async function set_containers(div, text) {
         span.id = container.cookieStoreId;
         span.innerText = container.name;
 
+        const icon = document.createElement('div');
+        icon.className = 'icon';
+
         const url = container.iconUrl || "resource://usercontext-content/circle.svg";
         const color = container.colorCode || 'grey';
         const img = document.createElement('img');
-        img.className = 'icon';
         img.style = `mask-image: url(${url}); background: ${color}`;
+        icon.appendChild(img);
+
+        const delete_icon = document.createElement('span');
+        delete_icon.className = 'delete-icon';
+        delete_icon.innerText = '❌';
+        icon.appendChild(delete_icon);
 
         const row = document.createElement('div');
         row.className = 'row';
         if (i == 0) {
             row.classList.add('current')
         }
-        row.appendChild(img);
+        row.appendChild(icon);
         row.appendChild(span);
         div.appendChild(row);
     }
@@ -93,23 +101,46 @@ if (browser.contextualIdentities === undefined) {
         set_containers(div, input.value.trim().toLowerCase());
     });
 
+    let delete_mode = false;
+
+    input.addEventListener('keyup', event => {
+        if (event.key == 'Shift' || event.key == 'Control') {
+            div.classList.remove('delete-mode');
+        }
+    });
+
     input.addEventListener('keydown', event => {
+        if ((event.key == 'Shift' && event.ctrlKey) || (event.key == 'Control' && event.shiftKey)) {
+            div.classList.add('delete-mode');
+        }
+
         if (event.key == 'Enter') {
             const node = document.querySelector('.row.current .name');
             if (node) {
                 open_new_tab(node.id);
             } else if (event.shiftKey) {
+                // make a new container
+                const icons = [ "fingerprint", "briefcase", "dollar", "cart", "circle", "gift", "vacation", "food", "fruit", "pet", "tree", "chill", "fence" ];
+                const colors = [ "blue", "turquoise", "green", "yellow", "orange", "red", "pink", "purple", "toolbar" ];
+                const icon = icons[Math.floor(Math.random() * icons.length)];
+                const color = colors[Math.floor(Math.random() * colors.length)];
                 (async() => {
-                    const icons = [ "fingerprint", "briefcase", "dollar", "cart", "circle", "gift", "vacation", "food", "fruit", "pet", "tree", "chill", "fence" ];
-                    const colors = [ "blue", "turquoise", "green", "yellow", "orange", "red", "pink", "purple", "toolbar" ];
-
-                    // make a new container
-                    const icon = icons[Math.floor(Math.random() * icons.length)];
-                    const color = colors[Math.floor(Math.random() * colors.length)];
-                    const container = (await browser.contextualIdentities.create({icon, color, name: input.value}))['cookieStoreId']
-                    open_new_tab(container);
+                    const container = (await browser.contextualIdentities.create({icon, color, name: input.value})).cookieStoreId;
+                    await open_new_tab(container);
                 })();
             }
+
+        } else if (event.key == 'Backspace' && event.shiftKey && event.ctrlKey) {
+            const node = document.querySelector('.row.current .name');
+            if (node) {
+                // delete
+                (async() => {
+                    await browser.contextualIdentities.remove(node.id);
+                    // refresh
+                    await set_containers(div, input.value.trim().toLowerCase());
+                })();
+            }
+
         } else if (event.key == 'Tab') {
             if (event.shiftKey) {
                 select_prev();
