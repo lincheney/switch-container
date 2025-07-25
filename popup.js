@@ -70,6 +70,12 @@ function select_prev() {
     }
 }
 
+async function open_new_tab(cookieStoreId) {
+    const tabs = await browser.tabs.query({ currentWindow: true, active: true });
+    await browser.tabs.create({cookieStoreId, index: tabs[0].index+1, active: true});
+    window.close();
+}
+
 const div = document.getElementById('containers');
 div.innerHTML = '';
 div.innerText = '';
@@ -91,10 +97,17 @@ if (browser.contextualIdentities === undefined) {
         if (event.key == 'Enter') {
             const node = document.querySelector('.row.current .name');
             if (node) {
+                open_new_tab(node.id);
+            } else if (event.shiftKey) {
                 (async() => {
-                    const tabs = await browser.tabs.query({ currentWindow: true, active: true });
-                    await browser.tabs.create({cookieStoreId: node.id, index: tabs[0].index+1, active: true});
-                    window.close();
+                    const icons = [ "fingerprint", "briefcase", "dollar", "cart", "circle", "gift", "vacation", "food", "fruit", "pet", "tree", "chill", "fence" ];
+                    const colors = [ "blue", "turquoise", "green", "yellow", "orange", "red", "pink", "purple", "toolbar" ];
+
+                    // make a new container
+                    const icon = icons[Math.floor(Math.random() * icons.length)];
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+                    const container = (await browser.contextualIdentities.create({icon, color, name: input.value}))['cookieStoreId']
+                    open_new_tab(container);
                 })();
             }
         } else if (event.key == 'Tab') {
