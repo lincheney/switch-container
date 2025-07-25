@@ -115,19 +115,25 @@ if (browser.contextualIdentities === undefined) {
         }
 
         if (event.key == 'Enter') {
-            const node = document.querySelector('.row.current .name');
-            if (node) {
-                open_new_tab(node.id);
-            } else if (event.shiftKey) {
+            if (event.shiftKey) {
                 // make a new container
-                const icons = [ "fingerprint", "briefcase", "dollar", "cart", "circle", "gift", "vacation", "food", "fruit", "pet", "tree", "chill", "fence" ];
-                const colors = [ "blue", "turquoise", "green", "yellow", "orange", "red", "pink", "purple", "toolbar" ];
-                const icon = icons[Math.floor(Math.random() * icons.length)];
-                const color = colors[Math.floor(Math.random() * colors.length)];
                 (async() => {
-                    const container = (await browser.contextualIdentities.create({icon, color, name: input.value})).cookieStoreId;
+                    let container = (await browser.contextualIdentities.query({name: input.value}))?.cookieStoreId;
+
+                    if (!container) {
+                        const icons = [ "fingerprint", "briefcase", "dollar", "cart", "circle", "gift", "vacation", "food", "fruit", "pet", "tree", "chill", "fence" ];
+                        const colors = [ "blue", "turquoise", "green", "yellow", "orange", "red", "pink", "purple", "toolbar" ];
+                        const icon = icons[Math.floor(Math.random() * icons.length)];
+                        const color = colors[Math.floor(Math.random() * colors.length)];
+                        container = (await browser.contextualIdentities.create({icon, color, name: input.value})).cookieStoreId;
+                    }
                     await open_new_tab(container);
                 })();
+            } else {
+                const node = document.querySelector('.row.current .name');
+                if (node) {
+                    open_new_tab(node.id);
+                }
             }
 
         } else if (event.key == 'Backspace' && event.shiftKey && event.ctrlKey) {
